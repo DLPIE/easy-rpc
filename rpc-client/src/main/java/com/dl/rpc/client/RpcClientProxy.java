@@ -29,8 +29,8 @@ public class RpcClientProxy {
                 // 对method增强
                 // 封装RpcRequest
                 RpcRequest rpcRequest = new RpcRequest();
-                rpcRequest.setInterfaceName(method.getDeclaringClass().getCanonicalName()); // todo 反射
-                rpcRequest.setMethodName(method.getName());
+                rpcRequest.setInterfaceName(method.getDeclaringClass().getCanonicalName()); // com.dl.UserService
+                rpcRequest.setMethodName(method.getName()); // hello
                 rpcRequest.setParamTypes(method.getParameterTypes());
                 rpcRequest.setParamValues(args);
                 // 3.将RpcRequest发到目标socket

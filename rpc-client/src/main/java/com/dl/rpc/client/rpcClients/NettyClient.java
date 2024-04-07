@@ -1,11 +1,13 @@
 package com.dl.rpc.client.rpcClients;
 
-import com.dl.rpc.client.NettyClientHandler;
 import com.dl.rpc.common.RpcRequest;
 import com.dl.rpc.common.RpcResponse;
 import com.dl.rpc.common.coder.CommonDecoder;
 import com.dl.rpc.common.coder.CommonEncoder;
+import com.dl.rpc.common.serialize.CommonSerializer;
 import com.dl.rpc.common.serialize.JsonSerializer;
+import com.dl.rpc.server.registry.NacosServiceRegistry;
+import com.dl.rpc.server.registry.ServiceRegistry;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -14,17 +16,20 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetSocketAddress;
+
+
 @Slf4j
 public class NettyClient implements RpcClient{
 
     private static final Bootstrap bootstrap; // netty启动器
 
-    String host;
-    int port;
+    private CommonSerializer serializer;
 
-    public NettyClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+    private ServiceRegistry serviceRegistry; // 利用Nacos服务发现，懒加载
+
+    public NettyClient() {
+        this.serviceRegistry=new NacosServiceRegistry();
     }
 
     // 初始化bootstrap。不同于Server端，它放到了静态代码块里，这样就避免了每次send都要重新初始化
@@ -44,7 +49,6 @@ public class NettyClient implements RpcClient{
                                 .addLast(new CommonEncoder(new JsonSerializer())) // 编码
                                 .addLast(new NettyClientHandler()); // 业务：解析response，加入k-v
 
-
                     }
                 });
     }
@@ -52,6 +56,10 @@ public class NettyClient implements RpcClient{
     @Override
     public Object sendRequest(RpcRequest request) {
         try {
+            // 多一步：利用nacos服务发现，获取目标ip和port(***)
+            InetSocketAddress inetSocketAddress = serviceRegistry.findService(request.getInterfaceName());
+            String host=inetSocketAddress.getHostName();
+            int port=inetSocketAddress.getPort();
             // 1.client阻塞，直到与服务端创建了连接（connect是nio线程异步执行的，所以用sync阻塞主线程，直到connect完毕）
             ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
             // 2.获取channal
@@ -76,5 +84,10 @@ public class NettyClient implements RpcClient{
             log.error("发送消息时发生错误：", e);
         }
         return null;
+    }
+
+    @Override
+    public void setSerializer(CommonSerializer serializer) {
+        this.serializer=serializer;
     }
 }

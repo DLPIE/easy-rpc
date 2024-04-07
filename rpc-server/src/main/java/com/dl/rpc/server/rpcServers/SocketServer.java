@@ -1,8 +1,8 @@
 package com.dl.rpc.server.rpcServers;
 
+import com.dl.rpc.common.serialize.CommonSerializer;
 import com.dl.rpc.server.RpcTask;
-import com.dl.rpc.server.ServiceProvider;
-import com.dl.rpc.server.rpcServers.RpcServer;
+import com.dl.rpc.server.provider.ServiceProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -43,5 +43,15 @@ public class SocketServer implements RpcServer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public <T> void publishService(Object servie, Class<T> serviceClass) {
+
+    }
+
+    @Override
+    public void setSerializer(CommonSerializer serializer) {
+
     }
 }

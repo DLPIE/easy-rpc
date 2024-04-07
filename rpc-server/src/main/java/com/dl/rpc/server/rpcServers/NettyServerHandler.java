@@ -1,7 +1,8 @@
-package com.dl.rpc.server;
+package com.dl.rpc.server.rpcServers;
 
 import com.dl.rpc.common.RpcRequest;
 import com.dl.rpc.common.RpcResponse;
+import com.dl.rpc.server.provider.ServiceProvider;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -16,17 +17,17 @@ import java.lang.reflect.Method;
 @Slf4j
 public class NettyServerHandler extends SimpleChannelInboundHandler<RpcRequest> { // 泛型很关键，处理RpcRequest类型的数据
 
-    private static ServiceProvider serviceRegistry;
+    private static ServiceProvider serviceProvider;
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcRequest rpcRequest) throws Exception {
         try {
             log.info("服务器收到请求:{}",rpcRequest);
             // 从管道中取出注册表（之前bootStrap初始化已经放入channal）
             AttributeKey<ServiceProvider> key = AttributeKey.valueOf("serviceProvider");// 根据名称获取AttributeKey实例
-            serviceRegistry = ctx.channel().attr(key).get(); // 从AttributeMap，根据AttributeKey获取value
+            serviceProvider = ctx.channel().attr(key).get(); // 从AttributeMap，根据AttributeKey获取value
             // 从注册表找到service
-            String interfaceName = rpcRequest.getInterfaceName();
-            Object service = serviceRegistry.getService(interfaceName);
+            String interfaceName = rpcRequest.getInterfaceName(); // com.dl.UserService
+            Object service = serviceProvider.getService(interfaceName); // userService对象
             // 寻找方法
             Method method = service.getClass().getMethod(rpcRequest.getMethodName(), rpcRequest.getParamTypes());
             Object methodResult = method.invoke(service, rpcRequest.getParamValues());

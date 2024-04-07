@@ -4,6 +4,7 @@ import com.dl.rpc.client.rpcClients.RpcClient;
 import com.dl.rpc.common.ResponseCode;
 import com.dl.rpc.common.RpcRequest;
 import com.dl.rpc.common.RpcResponse;
+import com.dl.rpc.common.serialize.CommonSerializer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ObjectInputStream;
@@ -50,5 +51,10 @@ public class SocketClient implements RpcClient {
             log.error("rpc发生异常:",e);
             throw new RuntimeException("rpc发生异常:"+e);
         }
+    }
+
+    @Override
+    public void setSerializer(CommonSerializer serializer) {
+
     }
 }

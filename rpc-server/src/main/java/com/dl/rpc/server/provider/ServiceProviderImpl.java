@@ -1,4 +1,4 @@
-package com.dl.rpc.server;
+package com.dl.rpc.server.provider;
 
 import com.dl.rpc.common.exception.RpcError;
 import com.dl.rpc.common.exception.RpcException;
@@ -10,10 +10,13 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
-public class DefaultServiceRegistry implements ServiceProvider{
-
+public class ServiceProviderImpl implements ServiceProvider {
     Map<String,Object> serviceMap=new HashMap<>();
     Set<String> registeredService=new HashSet<>();
+
+    public Map<String, Object> getServiceMap() {
+        return serviceMap;
+    }
 
     /**
      * 注册服务到注册表，注意syn保证线程安全
