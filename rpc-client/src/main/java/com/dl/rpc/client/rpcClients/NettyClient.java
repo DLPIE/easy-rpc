@@ -39,7 +39,12 @@ public class NettyClient implements RpcClient{
         bootstrap=new Bootstrap()
                 .group(group) // 1.设置EventLoopGroup
                 .channel(NioSocketChannel.class) // 2.指定Channel类型
-                .option(ChannelOption.SO_KEEPALIVE, true) // 若TCP连接长时间没有数据交换，会发送一个“keep-alive”探测包来检查连接是否仍然有效。没响应就断开
+                // TCP连接超时时间
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                // TCP开启底层心跳机制
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                // TCP开启Nagle算法，作用是尽可能的发送大数据快，减少网络传输
+                .option(ChannelOption.TCP_NODELAY, true)
                 .handler(new ChannelInitializer<SocketChannel>() { // 3.设置handler
                     @Override
                     protected void initChannel(SocketChannel channel) throws Exception {

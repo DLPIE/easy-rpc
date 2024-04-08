@@ -4,6 +4,7 @@ import com.dl.rpc.common.coder.CommonDecoder;
 import com.dl.rpc.common.coder.CommonEncoder;
 import com.dl.rpc.common.exception.RpcError;
 import com.dl.rpc.common.exception.RpcException;
+import com.dl.rpc.common.hook.ShutdownHook;
 import com.dl.rpc.common.serialize.CommonSerializer;
 import com.dl.rpc.common.serialize.JsonSerializer;
 import com.dl.rpc.server.provider.ServiceProvider;
@@ -48,7 +49,7 @@ public class NettyServer implements RpcServer{
     public <T> void publishService(Object servie, Class<T> serviceClass) {
         // 这里只注册了一个服务，可以将入参改为List实现多个
         serviceProvider.register(servie); // 注册到注册表
-        serviceRegistry.register(serviceClass.getCanonicalName(),new InetSocketAddress(host,port)); // 注册到nacos
+        serviceRegistry.register(serviceClass.getCanonicalName(),new InetSocketAddress(host,port)); // com.dl.HelloService注册到nacos
     }
 
     @Override
@@ -83,6 +84,8 @@ public class NettyServer implements RpcServer{
                     });
             // 启动netty，监听指定端口
             ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
+            // 添加钩子，在jvm突然关闭时自动注销服务
+            ShutdownHook.getShutdownHook().addClearAllHook();
             // server一直阻塞，直到channel关闭
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
