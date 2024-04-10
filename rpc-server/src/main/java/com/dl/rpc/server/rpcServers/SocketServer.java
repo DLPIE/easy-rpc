@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 // 监听指定端口，serviceImpl随时就绪
 @Slf4j
-public class SocketServer implements RpcServer {
+public class SocketServer extends AbstractRpcServer {
 
     ServiceProvider serviceRegistry; // 注册表
     ThreadPoolExecutor threadPoolExecutor;
@@ -45,10 +45,7 @@ public class SocketServer implements RpcServer {
         }
     }
 
-    @Override
-    public <T> void publishService(Object servie, Class<T> serviceClass) {
 
-    }
 
     @Override
     public void setSerializer(CommonSerializer serializer) {

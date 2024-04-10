@@ -17,7 +17,7 @@ import java.util.Set;
  * 每台服务器一个Nacos工具类
  */
 @Slf4j
-public class NacosUtils {
+public class NacosUtil {
     private  static NamingService namingService;
     private static String SERVER_ADDR="127.0.0.1:8848"; // 部署Nacos的地址
     static InetSocketAddress address; // 当前Server地址
@@ -34,15 +34,10 @@ public class NacosUtils {
     }
 
     // 2.服务注册：调用namingService的registerInstance(服务名，hostName,port)方法
-    public static void register(String serviceName, InetSocketAddress address) {
-        try {
-            namingService.registerInstance(serviceName,address.getHostName(),address.getPort());
-            serviceNames.add(serviceName);
-            NacosUtils.address=address;
-        } catch (NacosException e) {
-            log.error("Nacos注册时发生错误:",e);
-            throw new RuntimeException(e);
-        }
+    public static void register(String serviceName, InetSocketAddress address) throws Exception{
+        namingService.registerInstance(serviceName,address.getHostName(),address.getPort());
+        serviceNames.add(serviceName);
+        NacosUtil.address=address;
     }
 
     // 3.服务发现

@@ -11,11 +11,9 @@ public interface RpcServer {
 
     /**
      * 向Nacos注册服务
-     * @param servie
-     * @param serviceClass
      * @param <T>
      */
-    <T> void publishService(Object servie,Class<T> serviceClass);
+    <T> void publishService(T service, String serviceName);
 
     /**
      * 设置server的序列化器

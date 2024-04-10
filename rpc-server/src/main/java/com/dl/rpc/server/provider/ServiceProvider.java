@@ -1,7 +1,18 @@
 package com.dl.rpc.server.provider;
 
 public interface ServiceProvider {
-    <T> void register(T service); // 注意泛型
+    /**
+     * 注册到服务注册表
+     * @param service
+     * @param serviceName
+     * @param <T>
+     */
+    <T> void register(T service, String serviceName);
 
-    Object getService(String interfaceName);
+    /**
+     * 从注册表获取服务
+     * @param serviceName
+     * @return
+     */
+    Object getService(String serviceName);
 }

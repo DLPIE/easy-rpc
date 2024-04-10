@@ -6,11 +6,9 @@ import com.dl.rpc.common.exception.RpcError;
 import com.dl.rpc.common.exception.RpcException;
 import com.dl.rpc.common.hook.ShutdownHook;
 import com.dl.rpc.common.serialize.CommonSerializer;
-import com.dl.rpc.common.serialize.JsonSerializer;
 import com.dl.rpc.server.provider.ServiceProvider;
 import com.dl.rpc.server.provider.ServiceProviderImpl;
-import com.dl.rpc.server.registry.NacosServiceRegistry;
-import com.dl.rpc.server.registry.ServiceRegistry;
+import com.dl.rpc.common.registry.NacosServiceRegistry;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -27,14 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.InetSocketAddress;
 
 @Slf4j
-public class NettyServer implements RpcServer{
-
-    private ServiceProvider serviceProvider; // 此对象用来注册服务到注册表
-
-    private ServiceRegistry serviceRegistry; // 此对象用来注册服务到Nacos
-
-    String host; // 用于服务注册
-    int port;
+public class NettyServer extends AbstractRpcServer{
     CommonSerializer serializer;
 
 
@@ -43,14 +34,9 @@ public class NettyServer implements RpcServer{
         serviceRegistry=new NacosServiceRegistry();
         this.host=host;
         this.port=port;
+        scanServices(); // 扫描，实现服务自动注册
     }
 
-    @Override
-    public <T> void publishService(Object servie, Class<T> serviceClass) {
-        // 这里只注册了一个服务，可以将入参改为List实现多个
-        serviceProvider.register(servie); // 注册到注册表
-        serviceRegistry.register(serviceClass.getCanonicalName(),new InetSocketAddress(host,port)); // com.dl.HelloService注册到nacos
-    }
 
     @Override
     public void listen(int port) {

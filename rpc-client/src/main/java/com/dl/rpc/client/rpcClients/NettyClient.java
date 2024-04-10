@@ -4,10 +4,14 @@ import com.dl.rpc.common.RpcRequest;
 import com.dl.rpc.common.RpcResponse;
 import com.dl.rpc.common.coder.CommonDecoder;
 import com.dl.rpc.common.coder.CommonEncoder;
+import com.dl.rpc.common.loadBalance.RandomLoadBalancer;
+import com.dl.rpc.common.loadBalance.RoundRobinLoadBalancer;
+import com.dl.rpc.common.registry.NacosServiceDiscovery;
+import com.dl.rpc.common.registry.ServiceDiscovery;
 import com.dl.rpc.common.serialize.CommonSerializer;
 import com.dl.rpc.common.serialize.JsonSerializer;
-import com.dl.rpc.server.registry.NacosServiceRegistry;
-import com.dl.rpc.server.registry.ServiceRegistry;
+import com.dl.rpc.common.registry.NacosServiceRegistry;
+import com.dl.rpc.common.registry.ServiceRegistry;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -26,10 +30,10 @@ public class NettyClient implements RpcClient{
 
     private CommonSerializer serializer;
 
-    private ServiceRegistry serviceRegistry; // 利用Nacos服务发现，懒加载
+    private ServiceDiscovery serviceDiscovery; // 利用Nacos服务发现，懒加载
 
     public NettyClient() {
-        this.serviceRegistry=new NacosServiceRegistry();
+        this.serviceDiscovery=new NacosServiceDiscovery(new RandomLoadBalancer()); // 指定负载均衡策略
     }
 
     // 初始化bootstrap。不同于Server端，它放到了静态代码块里，这样就避免了每次send都要重新初始化
@@ -62,7 +66,7 @@ public class NettyClient implements RpcClient{
     public Object sendRequest(RpcRequest request) {
         try {
             // 多一步：利用nacos服务发现，获取目标ip和port(***)
-            InetSocketAddress inetSocketAddress = serviceRegistry.findService(request.getInterfaceName());
+            InetSocketAddress inetSocketAddress = serviceDiscovery.findService(request.getInterfaceName());
             String host=inetSocketAddress.getHostName();
             int port=inetSocketAddress.getPort();
             // 1.client阻塞，直到与服务端创建了连接（connect是nio线程异步执行的，所以用sync阻塞主线程，直到connect完毕）

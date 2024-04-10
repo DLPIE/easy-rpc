@@ -1,6 +1,6 @@
 package com.dl.rpc.common.hook;
 
-import com.dl.rpc.common.util.NacosUtils;
+import com.dl.rpc.common.util.NacosUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -17,7 +17,7 @@ public class ShutdownHook {
     public void addClearAllHook() {
         log.info("关闭后将自动注销所有服务");
         Runtime.getRuntime().addShutdownHook(new Thread(()->{ // 必须用lamda表达式
-            NacosUtils.deRegisterService();
+            NacosUtil.deRegisterService();
         }));
     }
 }

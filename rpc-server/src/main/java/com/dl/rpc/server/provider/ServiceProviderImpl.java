@@ -24,8 +24,7 @@ public class ServiceProviderImpl implements ServiceProvider {
      * @param <T>
      */
     @Override
-    public synchronized <T> void register(T service) {
-        String serviceName = service.getClass().getCanonicalName();
+    public synchronized <T> void register(T service, String serviceName) {
         // 如果已注册，就别注册了
         if(registeredService.contains(serviceName)) return;
         registeredService.add(serviceName);
